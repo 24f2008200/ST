@@ -146,3 +146,25 @@ For clauses `a` and `b` in this predicate, there was only ever one possible mino
 
 This is the standard textbook demonstration of why RACC ⇒ CACC ⇒ GACC in strength, but also why **RACC coverage isn't always achievable** — some predicates simply don't have a "unique true point" for every clause, and this predicate is exactly such a case.
 
+No contradiction — those are CACC pairs for **different clauses**, not competing answers for the same one.
+
+- **{3, 7}** is the CACC pair for clause **`a`** (b=F, c=T held fixed, a flips, p flips).
+- **{1,2}, {5,6}, {7,8}** are the three *candidate* CACC pairs for clause **`c`** (you pick exactly one of these three, not all of them).
+
+Each clause in the predicate gets its **own** CACC pair(s) — a full CACC test suite needs to cover all three clauses (`a`, `b`, `c`), and each clause's pair is found independently by fixing *that clause's* minor clauses and flipping *that clause* only.
+
+So to be fully explicit:
+
+| Clause | Minor clauses fixed at | Valid CACC pair(s) |
+|---|---|---|
+| `a` | b=F, c=T | **{3, 7}** — only one option |
+| `b` | a=T, c=T | **{1, 3}** — only one option |
+| `c` | a=T,b=T **or** a=F,b=T **or** a=F,b=F | **{1,2} or {5,6} or {7,8}** — pick any one of these three |
+
+A **CACC test suite for the whole predicate** just needs to include, for each clause, at least one valid pair for that clause — pairs can share rows across clauses to keep the suite small. That's exactly why I built the combined suite `{1, 3, 7, 8}` earlier:
+
+- `a`'s pair `{3,7}` ✓ (both present)
+- `b`'s pair `{1,3}` ✓ (both present)
+- `c`'s pair — I used `{7,8}` ✓ (both present, and it reuses row 7 already needed for `a`)
+
+So nothing changed — `{3,7}` is still `a`'s pair; `{1,2}`/`{5,6}`/`{7,8}` are `c`'s three *alternative* pairs, and I picked `{7,8}` specifically because it let me reuse a row already in the suite.
