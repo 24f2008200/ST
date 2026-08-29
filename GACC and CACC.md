@@ -1,3 +1,55 @@
+This question is about **Active Clause Coverage (ACC)** criteria from logic/predicate coverage testing (Ammann & Offutt). Both GACC and CACC test whether each individual clause in a compound predicate can independently affect the outcome — they differ in *how strict* they are about it.
+
+## Background concept: "Determination"
+
+A clause **c determines** a predicate **p** if changing only c's value (while other "minor" clauses stay fixed) changes p's truth value.
+
+For Active Clause Coverage, for each major clause `c` you need **two test cases**: one where `c = true`, one where `c = false`, and in both, `c` must determine `p`.
+
+The three variants differ in constraints on the **minor clauses** and on **p's value** across these two tests:
+
+| Criterion | Minor clause values across the 2 tests | p's value across the 2 tests |
+|---|---|---|
+| **GACC** (General ACC) | May be different | May be the same or different |
+| **CACC** (Correlated ACC) | May be different | **Must differ** (one T, one F) |
+| **RACC** (Restricted ACC) | Must be identical | Must differ (forced by determination) |
+
+## Example
+
+Let **p = (a && b) || (!a && c)**
+
+Compute p for each value of `a`:
+- If `a = T`: p = b || (F && c) = **b**
+- If `a = F`: p = (F && b) || (T && c) = **c**
+
+So `a` determines `p` whenever `b ≠ c`. Two minor-clause combos work:
+- **m1**: b=T, c=F → p(a=T)=T, p(a=F)=F
+- **m2**: b=F, c=T → p(a=T)=F, p(a=F)=T
+
+### GACC test set (allowed but weaker)
+
+| Test | a | b | c | p |
+|---|---|---|---|---|
+| 1 | T | T | F | **T** |
+| 2 | F | F | T | **T** |
+
+Here `a` determines `p` in *each individual test* (b≠c holds both times), so **GACC is satisfied** — even though `p` came out **true in both tests**. The minor clauses were allowed to differ, so we never actually observed `p` flip because of `a`.
+
+### CACC test set (stronger — requires actual correlation)
+
+| Test | a | b | c | p |
+|---|---|---|---|---|
+| 1 | T | T | F | **T** |
+| 2 | F | T | F | **F** |
+
+Here we reused the same minor clause values (b=T, c=F) for both tests, so toggling `a` alone flips `p` from T to F. **CACC is satisfied** — the correlation between `a`'s value and `p`'s outcome is directly demonstrated.
+
+## Key takeaway
+
+- **GACC**: weakest — just needs *some* test showing `c` determines `p` when true, and *some other* test showing it when false. Doesn't guarantee you actually saw the predicate's outcome change because of that clause.
+- **CACC**: stronger — explicitly requires the predicate's truth value to flip (T→F or F→T) between the two tests, giving direct evidence that the clause causes the predicate outcome to change.
+- ------------------------------------------------------------
+
 Yes. I agree with your objection. (a \Leftrightarrow b) is mathematically neat, but it feels "manufactured." A better way to understand the distinction is through a **real decision rule where one condition selects which other condition matters**.
 
 Consider this:
